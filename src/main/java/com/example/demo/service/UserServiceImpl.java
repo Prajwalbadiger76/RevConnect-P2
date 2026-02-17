@@ -1,56 +1,57 @@
 package com.example.demo.service;
 
+import com.example.demo.config.JwtUtil;
 import com.example.demo.dto.LoginRequest;
 import com.example.demo.dto.RegisterRequest;
 import com.example.demo.entity.User;
 import com.example.demo.exception.CustomException;
-import com.example.demo.mapper.UserMapper;
 import com.example.demo.repo.UserRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    public UserServiceImpl(UserRepository userRepository,
+                           PasswordEncoder passwordEncoder,
+                           JwtUtil jwtUtil) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
+    }
 
     @Override
-    public String register(RegisterRequest request) {
+    public void register(RegisterRequest request) {
 
-        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+        if (userRepository.findByUsername(request.username()).isPresent()) {
             throw new CustomException("Username already exists");
         }
 
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new CustomException("Email already exists");
-        }
-
-        User user = UserMapper.toEntity(request);
-
-        // Encrypt password
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        User user = new User(
+                request.username(),
+                request.email(),
+                passwordEncoder.encode(request.password()),
+                request.role()
+        );
 
         userRepository.save(user);
-
-        return "User registered successfully";
     }
 
     @Override
     public String login(LoginRequest request) {
 
-        User user = userRepository.findByUsername(request.getUsername())
+        User user = userRepository.findByUsername(request.username())
                 .orElseThrow(() -> new CustomException("Invalid username"));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new CustomException("Invalid password");
         }
 
-        return "Login successful";
+        return jwtUtil.generateToken(user);
     }
 }

@@ -5,7 +5,7 @@ import com.example.demo.dto.RegisterRequest;
 
 public interface UserService {
 
-    String register(RegisterRequest request);
+    void register(RegisterRequest request);
 
     String login(LoginRequest request);
 }

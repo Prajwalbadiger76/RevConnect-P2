@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class RevConnectP1Application {
+public class RevConnectP2Application {
 
 	public static void main(String[] args) {
-		SpringApplication.run(RevConnectP1Application.class, args);
+		SpringApplication.run(RevConnectP2Application.class, args);
 	}
 
 }
