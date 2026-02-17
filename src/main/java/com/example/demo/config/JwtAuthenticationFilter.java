@@ -1,6 +1,7 @@
 package com.example.demo.config;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,7 +22,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.jwtUtil = jwtUtil;
     }
 
-    // 🔥 VERY IMPORTANT: Skip auth endpoints
+    // Skip auth endpoints
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         return request.getServletPath().startsWith("/auth");
@@ -42,19 +43,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = header.substring(7);
 
-        Claims claims = jwtUtil.extractClaims(token);
+        // Basic JWT format check
+        if (!token.contains(".")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-        String username = claims.getSubject();
-        String role = claims.get("role", String.class);
+        try {
 
-        UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken(
-                        username,
-                        null,
-                        List.of(new SimpleGrantedAuthority("ROLE_" + role))
-                );
+            Claims claims = jwtUtil.extractClaims(token);
 
-        SecurityContextHolder.getContext().setAuthentication(auth);
+            String username = claims.getSubject();
+            String role = claims.get("role", String.class);
+
+            UsernamePasswordAuthenticationToken auth =
+                    new UsernamePasswordAuthenticationToken(
+                            username,
+                            null,
+                            List.of(new SimpleGrantedAuthority("ROLE_" + role))
+                    );
+
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
+        } catch (JwtException e) {
+            // Invalid token → clear context
+            SecurityContextHolder.clearContext();
+        }
 
         filterChain.doFilter(request, response);
     }

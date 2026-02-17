@@ -46,7 +46,8 @@ public class UserServiceImpl implements UserService {
     public String login(LoginRequest request) {
 
         User user = userRepository.findByUsername(request.username())
-                .orElseThrow(() -> new CustomException("Invalid username"));
+                .or(() -> userRepository.findByEmail(request.username()))
+                .orElseThrow(() -> new CustomException("Invalid username/email"));
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new CustomException("Invalid password");
@@ -54,4 +55,5 @@ public class UserServiceImpl implements UserService {
 
         return jwtUtil.generateToken(user);
     }
+
 }
