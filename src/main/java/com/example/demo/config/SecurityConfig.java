@@ -24,28 +24,28 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-            // 🔥 Disable default login mechanisms
             .csrf(csrf -> csrf.disable())
-            .formLogin(form -> form.disable())        // VERY IMPORTANT
-            .httpBasic(basic -> basic.disable())      // VERY IMPORTANT
-
-            // 🔥 Stateless session (JWT)
             .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-
-            // 🔥 Authorization rules
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll()
-                .anyRequest().authenticated()
+                    .requestMatchers(
+                            "/login",
+                            "/register",
+                            "/auth/login",
+                            "/auth/register",
+                            "/css/**",
+                            "/js/**"
+                    ).permitAll()
+                    .anyRequest().authenticated()
             );
 
-        // 🔥 Add JWT filter before UsernamePasswordAuthenticationFilter
         http.addFilterBefore(jwtFilter,
                 UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
