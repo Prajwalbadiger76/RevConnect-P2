@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,7 +28,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return request.getServletPath().startsWith("/auth");
+        return request.getServletPath().startsWith("/auth") ||
+               request.getServletPath().startsWith("/css") ||
+               request.getServletPath().startsWith("/js");
     }
 
     @Override
@@ -36,24 +39,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        String header = request.getHeader("Authorization");
+        String token = extractTokenFromCookies(request);
 
-        if (header == null || !header.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        if (token != null) {
+            try {
+                Claims claims = jwtUtil.extractClaims(token);
 
-        String token = header.substring(7);
-
-        try {
-
-            Claims claims = jwtUtil.extractClaims(token);
-
-            String username = claims.getSubject();
-            String role = claims.get("role", String.class);
-
-            if (username != null &&
-                SecurityContextHolder.getContext().getAuthentication() == null) {
+                String username = claims.getSubject();
+                String role = claims.get("role", String.class);
 
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
@@ -71,12 +64,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext()
                         .setAuthentication(authentication);
-            }
 
-        } catch (JwtException e) {
-            SecurityContextHolder.clearContext();
+            } catch (JwtException e) {
+                SecurityContextHolder.clearContext();
+            }
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private String extractTokenFromCookies(HttpServletRequest request) {
+
+        if (request.getCookies() == null) return null;
+
+        for (Cookie cookie : request.getCookies()) {
+            if ("JWT".equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+
+        return null;
     }
 }

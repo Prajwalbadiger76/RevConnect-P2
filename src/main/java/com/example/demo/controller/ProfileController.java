@@ -4,11 +4,11 @@ import com.example.demo.dto.ProfileResponse;
 import com.example.demo.dto.UpdateProfileRequest;
 import com.example.demo.service.ProfileService;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-@RestController
+@Controller
 @RequestMapping("/profile")
 public class ProfileController {
 
@@ -18,32 +18,59 @@ public class ProfileController {
         this.profileService = profileService;
     }
 
+    // ✅ View My Profile Page
     @GetMapping("/me")
-    public ProfileResponse getMyProfile(Authentication authentication) {
-        return profileService.getMyProfile(authentication.getName());
+    public String getMyProfile(Authentication authentication, Model model) {
+
+        ProfileResponse profile =
+                profileService.getMyProfile(authentication.getName());
+
+        model.addAttribute("profile", profile);
+
+        return "profile";  // profile.html
     }
 
-    @PutMapping("/me")
-    public ProfileResponse updateProfile(
-            Authentication authentication,
-            @RequestBody UpdateProfileRequest request) {
+    // ✅ Show Edit Profile Page
+    @GetMapping("/edit")
+    public String editProfilePage(Authentication authentication, Model model) {
 
-        return profileService.updateProfile(authentication.getName(), request);
+        ProfileResponse profile =
+                profileService.getMyProfile(authentication.getName());
+
+        model.addAttribute("profile", profile);
+
+        return "edit-profile"; // edit-profile.html
     }
 
+    // ✅ Handle Edit Profile Form Submit
+    @PostMapping("/edit")
+    public String updateProfile(Authentication authentication,
+                                @ModelAttribute UpdateProfileRequest request) {
+
+        profileService.updateProfile(authentication.getName(), request);
+
+        return "redirect:/profile/me";
+    }
+
+    // ✅ View Other User Profile
     @GetMapping("/{username}")
-    public ProfileResponse getProfile(@PathVariable String username) {
-        return profileService.getProfile(username);
+    public String getProfile(@PathVariable String username, Model model) {
+
+        ProfileResponse profile =
+                profileService.getProfile(username);
+
+        model.addAttribute("profile", profile);
+
+        return "profile";
     }
 
+    // ✅ Search Users Page
     @GetMapping("/search")
-    public List<ProfileResponse> search(@RequestParam String keyword) {
-        return profileService.searchUsers(keyword);
-    }
-    @GetMapping("/debug")
-    public String debug(Authentication authentication) {
-        return "User: " + authentication.getName() +
-               " | Authorities: " + authentication.getAuthorities();
-    }
+    public String search(@RequestParam String keyword, Model model) {
 
+        model.addAttribute("users",
+                profileService.searchUsers(keyword));
+
+        return "search-results"; // search-results.html
+    }
 }
