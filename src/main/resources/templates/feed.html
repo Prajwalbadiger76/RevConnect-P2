@@ -2,19 +2,82 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Feed</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .post-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .username {
+            font-weight: bold;
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .username:hover {
+            text-decoration: underline;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            color: gray;
+        }
+
+        .content {
+            margin-top: 10px;
+        }
+
+        .nav {
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
 
-<h2>Feed</h2>
+<div class="nav">
+    <a th:href="@{/profile/me}" class="btn">My Profile</a>
+    <a th:href="@{/logout}" class="btn">Logout</a>
+</div>
 
-<a th:href="@{/posts/create}">Create Post</a>
-<hr/>
+<h2>Your Feed</h2>
 
-<div th:each="post : ${posts}">
-    <p><b th:text="${post.username}"></b></p>
-    <p th:text="${post.content}"></p>
-    <small th:text="${post.createdAt}"></small>
-    <hr/>
+<div th:if="${posts.isEmpty()}">
+    <p>No posts yet. Follow users to see posts.</p>
+</div>
+
+<div th:each="post : ${posts}" class="post-card">
+
+    <!-- Clickable Username -->
+    <a th:href="@{/profile/{username}(username=${post.username})}"
+       class="username"
+       th:text="${post.username}">
+    </a>
+
+    <div class="timestamp"
+         th:text="${#temporals.format(post.createdAt, 'dd MMM yyyy HH:mm')}">
+    </div>
+
+    <div class="content"
+         th:text="${post.content}">
+    </div>
+
 </div>
 
 </body>
