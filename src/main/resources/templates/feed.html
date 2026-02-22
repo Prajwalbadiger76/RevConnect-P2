@@ -33,7 +33,22 @@
         }
 
         .content {
+            margin: 10px 0;
+        }
+
+        .like-section {
             margin-top: 10px;
+        }
+
+        .btn-like {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .liked {
+            color: red;
         }
 
         .nav {
@@ -58,24 +73,42 @@
 
 <h2>Your Feed</h2>
 
-<div th:if="${posts.isEmpty()}">
-    <p>No posts yet. Follow users to see posts.</p>
-</div>
-
 <div th:each="post : ${posts}" class="post-card">
 
-    <!-- Clickable Username -->
+    <!-- Username -->
     <a th:href="@{/profile/{username}(username=${post.username})}"
        class="username"
        th:text="${post.username}">
     </a>
 
+    <!-- Timestamp -->
     <div class="timestamp"
          th:text="${#temporals.format(post.createdAt, 'dd MMM yyyy HH:mm')}">
     </div>
 
+    <!-- Content -->
     <div class="content"
          th:text="${post.content}">
+    </div>
+
+    <!-- LIKE SECTION -->
+    <div class="like-section">
+
+        <span th:text="${post.likeCount}"></span> Likes
+
+        <form th:action="@{/like/{id}(id=${post.id})}"
+              method="post"
+              style="display:inline;">
+
+            <button type="submit"
+                    th:classappend="${post.likedByCurrentUser} ? 'liked'"
+                    class="btn-like">
+
+                <span th:text="${post.likedByCurrentUser} ? '❤️ Unlike' : '🤍 Like'}"></span>
+
+            </button>
+        </form>
+
     </div>
 
 </div>
