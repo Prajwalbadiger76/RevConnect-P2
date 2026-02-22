@@ -8,7 +8,6 @@ import com.example.demo.repo.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ProfileServiceImpl implements ProfileService {
@@ -19,14 +18,19 @@ public class ProfileServiceImpl implements ProfileService {
         this.userRepository = userRepository;
     }
 
+    // ================= MY PROFILE =================
+
     @Override
     public ProfileResponse getMyProfile(String username) {
         User user = findUser(username);
         return map(user);
     }
 
+    // ================= VIEW OTHER PROFILE =================
+
     @Override
     public ProfileResponse getProfile(String username) {
+
         User user = findUser(username);
 
         if (user.isPrivate()) {
@@ -36,8 +40,11 @@ public class ProfileServiceImpl implements ProfileService {
         return map(user);
     }
 
+    // ================= UPDATE PROFILE =================
+
     @Override
-    public ProfileResponse updateProfile(String username, UpdateProfileRequest request) {
+    public ProfileResponse updateProfile(String username,
+                                         UpdateProfileRequest request) {
 
         User user = findUser(username);
 
@@ -64,6 +71,8 @@ public class ProfileServiceImpl implements ProfileService {
         return map(user);
     }
 
+    // ================= SEARCH USERS =================
+
     @Override
     public List<ProfileResponse> searchUsers(String keyword) {
 
@@ -75,6 +84,7 @@ public class ProfileServiceImpl implements ProfileService {
                 .toList();
     }
 
+    // ================= HELPERS =================
 
     private User findUser(String username) {
         return userRepository.findByUsername(username)

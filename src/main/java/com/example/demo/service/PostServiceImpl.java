@@ -17,16 +17,22 @@ public class PostServiceImpl implements PostService {
     private final HashtagRepository hashtagRepository;
     private final PostHashtagRepository postHashtagRepository;
     private final UserRepository userRepository;
+    private final FollowRepository followRepository;   // ✅ NEW
 
     public PostServiceImpl(PostRepository postRepository,
                            HashtagRepository hashtagRepository,
                            PostHashtagRepository postHashtagRepository,
-                           UserRepository userRepository) {
+                           UserRepository userRepository,
+                           FollowRepository followRepository) {  // ✅ NEW
+
         this.postRepository = postRepository;
         this.hashtagRepository = hashtagRepository;
         this.postHashtagRepository = postHashtagRepository;
         this.userRepository = userRepository;
+        this.followRepository = followRepository;  // ✅ NEW
     }
+
+    // ================= CREATE POST =================
 
     @Override
     public void createPost(String username, String content) {
@@ -65,6 +71,8 @@ public class PostServiceImpl implements PostService {
         }
     }
 
+    // ================= USER POSTS =================
+
     @Override
     public List<PostDto> getUserPosts(String username) {
 
@@ -77,6 +85,8 @@ public class PostServiceImpl implements PostService {
                 .collect(Collectors.toList());
     }
 
+    // ================= GLOBAL POSTS =================
+
     @Override
     public List<PostDto> getAllPosts() {
 
@@ -85,6 +95,34 @@ public class PostServiceImpl implements PostService {
                 .map(this::map)
                 .collect(Collectors.toList());
     }
+
+    // ================= PERSONALIZED FEED =================
+
+    @Override
+    public List<PostDto> getFeedPosts(String username) {
+
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow();
+
+        // Get followed users
+        List<User> followedUsers = followRepository
+                .findByFollower(currentUser)
+                .stream()
+                .map(Follow::getFollowing)
+                .collect(Collectors.toList());
+
+        // Include self posts
+        List<User> feedUsers = new ArrayList<>(followedUsers);
+        feedUsers.add(currentUser);
+
+        return postRepository
+                .findByUserInOrderByCreatedAtDesc(feedUsers)
+                .stream()
+                .map(this::map)
+                .collect(Collectors.toList());
+    }
+
+    // ================= DTO MAPPER =================
 
     private PostDto map(Post post) {
 

@@ -10,4 +10,6 @@ public interface PostService {
     List<PostDto> getUserPosts(String username);
 
     List<PostDto> getAllPosts();
+
+    List<PostDto> getFeedPosts(String username);
 }
