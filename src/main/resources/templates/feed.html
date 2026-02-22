@@ -14,7 +14,7 @@
             border: 1px solid #ddd;
             padding: 15px;
             border-radius: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .username {
@@ -49,6 +49,30 @@
 
         .liked {
             color: red;
+        }
+
+        .comment-section {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .comment {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .comment strong {
+            color: #007bff;
+        }
+
+        .comment-form input {
+            width: 75%;
+            padding: 5px;
+        }
+
+        .comment-form button {
+            padding: 5px 10px;
         }
 
         .nav {
@@ -93,7 +117,6 @@
 
     <!-- LIKE SECTION -->
     <div class="like-section">
-
         <span th:text="${post.likeCount}"></span> Likes
 
         <form th:action="@{/like/{id}(id=${post.id})}"
@@ -107,6 +130,30 @@
                 <span th:text="${post.likedByCurrentUser} ? '❤️ Unlike' : '🤍 Like'}"></span>
 
             </button>
+        </form>
+    </div>
+
+    <!-- COMMENT SECTION -->
+    <div class="comment-section">
+
+        <!-- Existing Comments -->
+        <div th:each="comment : ${post.comments}" class="comment">
+            <strong th:text="${comment.username}"></strong>:
+            <span th:text="${comment.content}"></span>
+        </div>
+
+        <!-- Add Comment -->
+        <form th:action="@{/comment/{postId}(postId=${post.id})}"
+              method="post"
+              class="comment-form">
+
+            <input type="text"
+                   name="content"
+                   placeholder="Write a comment..."
+                   required />
+
+            <button type="submit">Post</button>
+
         </form>
 
     </div>
