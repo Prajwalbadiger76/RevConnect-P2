@@ -159,9 +159,14 @@ public class PostServiceImpl implements PostService {
                 .stream()
                 .map(comment -> {
                     CommentDto cd = new CommentDto();
+                    cd.setId(comment.getId());
                     cd.setUsername(comment.getUser().getUsername());
                     cd.setContent(comment.getContent());
                     cd.setCreatedAt(comment.getCreatedAt());
+                    cd.setOwnedByCurrentUser(
+                            comment.getUser().getUsername()
+                                    .equals(currentUser.getUsername())
+                    );
                     return cd;
                 })
                 .collect(Collectors.toList());
