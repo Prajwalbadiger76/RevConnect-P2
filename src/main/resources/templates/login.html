@@ -1,23 +1,49 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Login</title>
+    <title>Login | RevConnect</title>
+    <link rel="stylesheet" th:href="@{/css/login.css}">
 </head>
 <body>
 
-<h2>Login</h2>
+<div class="login-wrapper">
 
-<form th:action="@{/auth/login}" method="post">
-    <label>Username or Email:</label>
-    <input type="text" name="username"/><br/>
+    <!-- LEFT SIDE -->
+    <div class="login-left"></div>
 
-    <label>Password:</label>
-    <input type="password" name="password"/><br/>
+    <!-- RIGHT SIDE -->
+    <div class="login-right">
+        <div class="login-card">
 
-    <button type="submit">Login</button>
-</form>
+            <h2>Welcome Back</h2>
 
-<a th:href="@{/register}">Register</a>
+            <form th:action="@{/api/auth/login}" method="post">
+
+                <div class="login-group">
+                    <input type="text" name="username"
+                           placeholder="Username or Email" required>
+                </div>
+
+                <div class="login-group">
+                    <input type="password" name="password"
+                           placeholder="Password" required>
+                </div>
+
+                <button type="submit" class="login-btn">
+                    Login
+                </button>
+
+            </form>
+
+            <div class="login-footer">
+                Don’t have an account?
+                <a th:href="@{/register}">Sign up</a>
+            </div>
+
+        </div>
+    </div>
+
+</div>
 
 </body>
 </html>

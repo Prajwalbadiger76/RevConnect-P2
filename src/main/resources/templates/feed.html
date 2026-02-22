@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Feed</title>
+</head>
+<body>
+
+<h2>Feed</h2>
+
+<a th:href="@{/posts/create}">Create Post</a>
+<hr/>
+
+<div th:each="post : ${posts}">
+    <p><b th:text="${post.username}"></b></p>
+    <p th:text="${post.content}"></p>
+    <small th:text="${post.createdAt}"></small>
+    <hr/>
+</div>
+
+</body>
+</html>

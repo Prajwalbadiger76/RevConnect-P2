@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Create Post</title>
+</head>
+<body>
+
+<h2>Create Post</h2>
+
+<form th:action="@{/posts/create}" method="post">
+
+    <textarea name="content"
+              placeholder="What's on your mind?"
+              rows="5" cols="50"></textarea>
+
+    <br/><br/>
+    <button type="submit">Post</button>
+</form>
+
+<a th:href="@{/feed}">Go to Feed</a>
+
+</body>
+</html>

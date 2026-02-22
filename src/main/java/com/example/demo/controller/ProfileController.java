@@ -18,7 +18,7 @@ public class ProfileController {
         this.profileService = profileService;
     }
 
-    // ✅ View My Profile Page
+    // View Profile
     @GetMapping("/me")
     public String getMyProfile(Authentication authentication, Model model) {
 
@@ -27,10 +27,10 @@ public class ProfileController {
 
         model.addAttribute("profile", profile);
 
-        return "profile";  // profile.html
+        return "profile";
     }
 
-    // ✅ Show Edit Profile Page
+    // Show Edit Page
     @GetMapping("/edit")
     public String editProfilePage(Authentication authentication, Model model) {
 
@@ -39,10 +39,10 @@ public class ProfileController {
 
         model.addAttribute("profile", profile);
 
-        return "edit-profile"; // edit-profile.html
+        return "edit-profile";
     }
 
-    // ✅ Handle Edit Profile Form Submit
+    // Handle Edit Submit
     @PostMapping("/edit")
     public String updateProfile(Authentication authentication,
                                 @ModelAttribute UpdateProfileRequest request) {
@@ -50,27 +50,5 @@ public class ProfileController {
         profileService.updateProfile(authentication.getName(), request);
 
         return "redirect:/profile/me";
-    }
-
-    // ✅ View Other User Profile
-    @GetMapping("/{username}")
-    public String getProfile(@PathVariable String username, Model model) {
-
-        ProfileResponse profile =
-                profileService.getProfile(username);
-
-        model.addAttribute("profile", profile);
-
-        return "profile";
-    }
-
-    // ✅ Search Users Page
-    @GetMapping("/search")
-    public String search(@RequestParam String keyword, Model model) {
-
-        model.addAttribute("users",
-                profileService.searchUsers(keyword));
-
-        return "search-results"; // search-results.html
     }
 }
