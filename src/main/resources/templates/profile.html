@@ -2,21 +2,94 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .profile-card {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .counts {
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-right: 10px;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+    </style>
 </head>
 <body>
 
-<h2>My Profile</h2>
+<div class="profile-card">
 
-<p>Username: <span th:text="${profile.username}"></span></p>
-<p>Email: <span th:text="${profile.email}"></span></p>
-<p>Role: <span th:text="${profile.role}"></span></p>
-<p>Full Name: <span th:text="${profile.fullName}"></span></p>
-<p>Bio: <span th:text="${profile.bio}"></span></p>
+    <h2 th:text="${profile.fullName} ?: ${profile.username}"></h2>
 
-<a th:href="@{/profile/edit}">Edit Profile</a>
-<br></br>
+    <p><strong>@</strong><span th:text="${profile.username}"></span></p>
+    <p><strong>Email:</strong> <span th:text="${profile.email}"></span></p>
+    <p><strong>Role:</strong> <span th:text="${profile.role}"></span></p>
+    <p><strong>Bio:</strong> <span th:text="${profile.bio}"></span></p>
 
-<a th:href="@{/logout}">Logout</a>
+    <div class="counts">
+        Followers: <span th:text="${profile.followerCount}"></span> |
+        Following: <span th:text="${profile.followingCount}"></span>
+    </div>
+
+    <!-- Show Edit Button only if own profile -->
+    <div th:if="${profile.isOwnProfile}">
+        <a th:href="@{/profile/edit}" class="btn btn-secondary">Edit Profile</a>
+    </div>
+
+    <!-- Show Follow / Unfollow only if NOT own profile -->
+    <div th:if="${!profile.isOwnProfile}">
+
+        <!-- If NOT following -->
+        <form th:if="${!profile.isFollowing}"
+              th:action="@{/follow/{username}(username=${profile.username})}"
+              method="post">
+            <button type="submit" class="btn btn-primary">Follow</button>
+        </form>
+
+        <!-- If already following -->
+        <form th:if="${profile.isFollowing}"
+              th:action="@{/follow/unfollow/{username}(username=${profile.username})}"
+              method="post">
+            <button type="submit" class="btn btn-danger">Unfollow</button>
+        </form>
+
+    </div>
+
+    <br>
+    <a th:href="@{/feed}" class="btn btn-secondary">Back to Feed</a>
+    <a th:href="@{/logout}" class="btn btn-secondary">Logout</a>
+
+</div>
 
 </body>
 </html>

@@ -18,19 +18,39 @@ public class ProfileController {
         this.profileService = profileService;
     }
 
-    // View Profile
+    // ================= VIEW MY PROFILE =================
     @GetMapping("/me")
     public String getMyProfile(Authentication authentication, Model model) {
 
         ProfileResponse profile =
-                profileService.getMyProfile(authentication.getName());
+                profileService.getProfileWithFollowInfo(
+                        authentication.getName(),
+                        authentication.getName()
+                );
 
         model.addAttribute("profile", profile);
 
         return "profile";
     }
 
-    // Show Edit Page
+    // ================= VIEW OTHER PROFILE =================
+    @GetMapping("/{username}")
+    public String viewProfile(@PathVariable String username,
+                              Authentication authentication,
+                              Model model) {
+
+        ProfileResponse profile =
+                profileService.getProfileWithFollowInfo(
+                        authentication.getName(),
+                        username
+                );
+
+        model.addAttribute("profile", profile);
+
+        return "profile";
+    }
+
+    // ================= EDIT PROFILE PAGE =================
     @GetMapping("/edit")
     public String editProfilePage(Authentication authentication, Model model) {
 
@@ -42,7 +62,7 @@ public class ProfileController {
         return "edit-profile";
     }
 
-    // Handle Edit Submit
+    // ================= UPDATE PROFILE =================
     @PostMapping("/edit")
     public String updateProfile(Authentication authentication,
                                 @ModelAttribute UpdateProfileRequest request) {
