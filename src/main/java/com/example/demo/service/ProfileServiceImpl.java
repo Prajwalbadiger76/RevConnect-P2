@@ -4,6 +4,7 @@ import com.example.demo.dto.ProfileResponse;
 import com.example.demo.dto.UpdateProfileRequest;
 import com.example.demo.entity.User;
 import com.example.demo.exception.CustomException;
+import com.example.demo.repo.FollowRepository;
 import com.example.demo.repo.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -13,31 +14,65 @@ import java.util.List;
 public class ProfileServiceImpl implements ProfileService {
 
     private final UserRepository userRepository;
+    private final FollowRepository followRepository;
 
-    public ProfileServiceImpl(UserRepository userRepository) {
+    public ProfileServiceImpl(UserRepository userRepository,
+                              FollowRepository followRepository) {
         this.userRepository = userRepository;
+        this.followRepository = followRepository;
     }
 
     // ================= MY PROFILE =================
 
     @Override
     public ProfileResponse getMyProfile(String username) {
-        User user = findUser(username);
-        return map(user);
+        return getProfileWithFollowInfo(username, username);
     }
 
-    // ================= VIEW OTHER PROFILE =================
-
+    // ✅ REQUIRED BY INTERFACE (KEEP THIS)
     @Override
     public ProfileResponse getProfile(String username) {
+        return getProfileWithFollowInfo(username, username);
+    }
 
-        User user = findUser(username);
+    // ================= VIEW PROFILE WITH FOLLOW INFO =================
 
-        if (user.isPrivate()) {
-            throw new CustomException("This profile is private");
+    @Override
+    public ProfileResponse getProfileWithFollowInfo(String currentUsername,
+                                                    String targetUsername) {
+
+        User targetUser = findUser(targetUsername);
+
+        boolean isOwnProfile = currentUsername.equals(targetUsername);
+
+        boolean isFollowing = false;
+
+        if (!isOwnProfile) {
+            User currentUser = findUser(currentUsername);
+
+            isFollowing = followRepository
+                    .findByFollowerAndFollowing(currentUser, targetUser)
+                    .isPresent();
         }
 
-        return map(user);
+        long followers = followRepository.countByFollowing(targetUser);
+        long following = followRepository.countByFollower(targetUser);
+
+        return new ProfileResponse(
+                targetUser.getUsername(),
+                targetUser.getEmail(),
+                targetUser.getRole(),
+                targetUser.getFullName(),
+                targetUser.getBio(),
+                targetUser.getProfilePicture(),
+                targetUser.getLocation(),
+                targetUser.getWebsite(),
+                targetUser.isPrivate(),
+                isFollowing,
+                followers,
+                following,
+                isOwnProfile
+        );
     }
 
     // ================= UPDATE PROFILE =================
@@ -68,7 +103,7 @@ public class ProfileServiceImpl implements ProfileService {
 
         userRepository.save(user);
 
-        return map(user);
+        return getMyProfile(username);
     }
 
     // ================= SEARCH USERS =================
@@ -80,28 +115,28 @@ public class ProfileServiceImpl implements ProfileService {
                 .findByUsernameContainingIgnoreCaseOrFullNameContainingIgnoreCase(
                         keyword, keyword)
                 .stream()
-                .map(this::map)
+                .map(user -> new ProfileResponse(
+                        user.getUsername(),
+                        user.getEmail(),
+                        user.getRole(),
+                        user.getFullName(),
+                        user.getBio(),
+                        user.getProfilePicture(),
+                        user.getLocation(),
+                        user.getWebsite(),
+                        user.isPrivate(),
+                        false,
+                        followRepository.countByFollowing(user),
+                        followRepository.countByFollower(user),
+                        false
+                ))
                 .toList();
     }
 
-    // ================= HELPERS =================
+    // ================= HELPER =================
 
     private User findUser(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException("User not found"));
-    }
-
-    private ProfileResponse map(User user) {
-        return new ProfileResponse(
-                user.getUsername(),
-                user.getEmail(),
-                user.getRole(),
-                user.getFullName(),
-                user.getBio(),
-                user.getProfilePicture(),
-                user.getLocation(),
-                user.getWebsite(),
-                user.isPrivate()
-        );
     }
 }

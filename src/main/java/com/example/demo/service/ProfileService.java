@@ -14,4 +14,7 @@ public interface ProfileService {
     ProfileResponse updateProfile(String username, UpdateProfileRequest request);
 
     List<ProfileResponse> searchUsers(String keyword);
+    
+    ProfileResponse getProfileWithFollowInfo(String currentUsername, String targetUsername);
+    
 }

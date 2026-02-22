@@ -11,5 +11,9 @@ public record ProfileResponse(
         String profilePicture,
         String location,
         String website,
-        boolean isPrivate
+        boolean isPrivate,
+        boolean isFollowing,
+        long followerCount,
+        long followingCount,
+        boolean isOwnProfile
 ) {}
