@@ -18,18 +18,20 @@ public class PostServiceImpl implements PostService {
     private final PostHashtagRepository postHashtagRepository;
     private final UserRepository userRepository;
     private final FollowRepository followRepository;   // ✅ NEW
+    private final LikeRepository likeRepository;
 
     public PostServiceImpl(PostRepository postRepository,
                            HashtagRepository hashtagRepository,
                            PostHashtagRepository postHashtagRepository,
                            UserRepository userRepository,
-                           FollowRepository followRepository) {  // ✅ NEW
+                           FollowRepository followRepository, LikeRepository likeRepository) {  
 
         this.postRepository = postRepository;
         this.hashtagRepository = hashtagRepository;
         this.postHashtagRepository = postHashtagRepository;
         this.userRepository = userRepository;
-        this.followRepository = followRepository;  // ✅ NEW
+        this.followRepository = followRepository; 
+        this.likeRepository = likeRepository;
     }
 
     // ================= CREATE POST =================
@@ -76,12 +78,12 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<PostDto> getUserPosts(String username) {
 
-        User user = userRepository.findByUsername(username)
+        User currentUser = userRepository.findByUsername(username)
                 .orElseThrow();
 
-        return postRepository.findByUserOrderByCreatedAtDesc(user)
+        return postRepository.findByUserOrderByCreatedAtDesc(currentUser)
                 .stream()
-                .map(this::map)
+                .map(post -> map(post, currentUser))
                 .collect(Collectors.toList());
     }
 
@@ -90,9 +92,21 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<PostDto> getAllPosts() {
 
+        // For global feed, we don't know current user.
+        // So we skip likedByCurrentUser logic safely.
+
         return postRepository.findAllByOrderByCreatedAtDesc()
                 .stream()
-                .map(this::map)
+                .map(post -> {
+                    PostDto dto = new PostDto();
+                    dto.setId(post.getId());
+                    dto.setContent(post.getContent());
+                    dto.setCreatedAt(post.getCreatedAt());
+                    dto.setUsername(post.getUser().getUsername());
+                    dto.setLikeCount(likeRepository.countByPost(post));
+                    dto.setLikedByCurrentUser(false);
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -118,19 +132,26 @@ public class PostServiceImpl implements PostService {
         return postRepository
                 .findByUserInOrderByCreatedAtDesc(feedUsers)
                 .stream()
-                .map(this::map)
+                .map(post -> map(post, currentUser))
                 .collect(Collectors.toList());
     }
 
     // ================= DTO MAPPER =================
 
-    private PostDto map(Post post) {
+    
+    private PostDto map(Post post, User currentUser) {
 
         PostDto dto = new PostDto();
         dto.setId(post.getId());
         dto.setContent(post.getContent());
         dto.setCreatedAt(post.getCreatedAt());
         dto.setUsername(post.getUser().getUsername());
+
+        dto.setLikeCount(likeRepository.countByPost(post));
+
+        dto.setLikedByCurrentUser(
+                likeRepository.findByUserAndPost(currentUser, post).isPresent()
+        );
 
         return dto;
     }

@@ -8,6 +8,8 @@ public class PostDto {
     private String content;
     private String username;
     private LocalDateTime createdAt;
+    private long likeCount;
+    private boolean likedByCurrentUser;
 
     public PostDto() {
     }
@@ -49,5 +51,21 @@ public class PostDto {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public long getLikeCount() {
+        return likeCount;
+    }
+
+    public void setLikeCount(long likeCount) {
+        this.likeCount = likeCount;
+    }
+
+    public boolean isLikedByCurrentUser() {
+        return likedByCurrentUser;
+    }
+
+    public void setLikedByCurrentUser(boolean likedByCurrentUser) {
+        this.likedByCurrentUser = likedByCurrentUser;
     }
 }
