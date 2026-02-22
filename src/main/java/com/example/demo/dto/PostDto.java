@@ -1,6 +1,7 @@
 package com.example.demo.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class PostDto {
 
@@ -10,6 +11,7 @@ public class PostDto {
     private LocalDateTime createdAt;
     private long likeCount;
     private boolean likedByCurrentUser;
+    private List<CommentDto> comments;
 
     public PostDto() {
     }
@@ -67,5 +69,15 @@ public class PostDto {
 
     public void setLikedByCurrentUser(boolean likedByCurrentUser) {
         this.likedByCurrentUser = likedByCurrentUser;
+    }
+    
+    
+
+    public List<CommentDto> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<CommentDto> comments) {
+        this.comments = comments;
     }
 }

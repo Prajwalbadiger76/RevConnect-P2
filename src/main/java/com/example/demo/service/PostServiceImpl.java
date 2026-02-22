@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.CommentDto;
 import com.example.demo.dto.PostDto;
 import com.example.demo.entity.*;
 import com.example.demo.repo.*;
@@ -17,21 +18,25 @@ public class PostServiceImpl implements PostService {
     private final HashtagRepository hashtagRepository;
     private final PostHashtagRepository postHashtagRepository;
     private final UserRepository userRepository;
-    private final FollowRepository followRepository;   // ✅ NEW
+    private final FollowRepository followRepository;
     private final LikeRepository likeRepository;
+    private final CommentRepository commentRepository;
 
     public PostServiceImpl(PostRepository postRepository,
                            HashtagRepository hashtagRepository,
                            PostHashtagRepository postHashtagRepository,
                            UserRepository userRepository,
-                           FollowRepository followRepository, LikeRepository likeRepository) {  
+                           FollowRepository followRepository,
+                           LikeRepository likeRepository,
+                           CommentRepository commentRepository) {
 
         this.postRepository = postRepository;
         this.hashtagRepository = hashtagRepository;
         this.postHashtagRepository = postHashtagRepository;
         this.userRepository = userRepository;
-        this.followRepository = followRepository; 
+        this.followRepository = followRepository;
         this.likeRepository = likeRepository;
+        this.commentRepository = commentRepository;
     }
 
     // ================= CREATE POST =================
@@ -49,7 +54,7 @@ public class PostServiceImpl implements PostService {
 
         postRepository.save(post);
 
-        // 🔥 Hashtag Parsing
+        // Hashtag Parsing
         Pattern pattern = Pattern.compile("#(\\w+)");
         Matcher matcher = pattern.matcher(content);
 
@@ -92,9 +97,6 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<PostDto> getAllPosts() {
 
-        // For global feed, we don't know current user.
-        // So we skip likedByCurrentUser logic safely.
-
         return postRepository.findAllByOrderByCreatedAtDesc()
                 .stream()
                 .map(post -> {
@@ -105,6 +107,7 @@ public class PostServiceImpl implements PostService {
                     dto.setUsername(post.getUser().getUsername());
                     dto.setLikeCount(likeRepository.countByPost(post));
                     dto.setLikedByCurrentUser(false);
+                    dto.setComments(Collections.emptyList());
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -118,14 +121,12 @@ public class PostServiceImpl implements PostService {
         User currentUser = userRepository.findByUsername(username)
                 .orElseThrow();
 
-        // Get followed users
         List<User> followedUsers = followRepository
                 .findByFollower(currentUser)
                 .stream()
                 .map(Follow::getFollowing)
                 .collect(Collectors.toList());
 
-        // Include self posts
         List<User> feedUsers = new ArrayList<>(followedUsers);
         feedUsers.add(currentUser);
 
@@ -138,7 +139,6 @@ public class PostServiceImpl implements PostService {
 
     // ================= DTO MAPPER =================
 
-    
     private PostDto map(Post post, User currentUser) {
 
         PostDto dto = new PostDto();
@@ -147,11 +147,26 @@ public class PostServiceImpl implements PostService {
         dto.setCreatedAt(post.getCreatedAt());
         dto.setUsername(post.getUser().getUsername());
 
+        // Likes
         dto.setLikeCount(likeRepository.countByPost(post));
-
         dto.setLikedByCurrentUser(
                 likeRepository.findByUserAndPost(currentUser, post).isPresent()
         );
+
+        // Comments
+        List<CommentDto> commentDtos = commentRepository
+                .findByPostOrderByCreatedAtAsc(post)
+                .stream()
+                .map(comment -> {
+                    CommentDto cd = new CommentDto();
+                    cd.setUsername(comment.getUser().getUsername());
+                    cd.setContent(comment.getContent());
+                    cd.setCreatedAt(comment.getCreatedAt());
+                    return cd;
+                })
+                .collect(Collectors.toList());
+
+        dto.setComments(commentDtos);
 
         return dto;
     }
