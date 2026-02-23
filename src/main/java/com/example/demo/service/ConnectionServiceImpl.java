@@ -15,11 +15,13 @@ public class ConnectionServiceImpl implements ConnectionService {
 
     private final ConnectionRepository connectionRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public ConnectionServiceImpl(ConnectionRepository connectionRepository,
-                                 UserRepository userRepository) {
+                                 UserRepository userRepository, NotificationService notificationService) {
         this.connectionRepository = connectionRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     // ================= SEND REQUEST =================
@@ -47,6 +49,13 @@ public class ConnectionServiceImpl implements ConnectionService {
         connection.setCreatedAt(LocalDateTime.now());
 
         connectionRepository.save(connection);
+        
+        notificationService.createNotification(
+                receiver.getUsername(),
+                requester.getUsername(),
+                "CONNECTION_REQUEST",
+                null
+        );
     }
 
     // ================= ACCEPT REQUEST =================
