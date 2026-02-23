@@ -50,6 +50,7 @@ public class ConnectionServiceImpl implements ConnectionService {
 
         connectionRepository.save(connection);
         
+        System.out.println("Sending connection notification...");
         notificationService.createNotification(
                 receiver.getUsername(),
                 requester.getUsername(),

@@ -77,10 +77,23 @@ public class NotificationServiceImpl implements NotificationService {
 
     private String buildMessage(Notification n) {
         return switch (n.getType()) {
-            case "LIKE" -> n.getSender().getUsername() + " liked your post";
-            case "COMMENT" -> n.getSender().getUsername() + " commented on your post";
-            case "FOLLOW" -> n.getSender().getUsername() + " started following you";
-            default -> "New notification";
+            case "LIKE" ->
+                    n.getSender().getUsername() + " liked your post";
+
+            case "COMMENT" ->
+                    n.getSender().getUsername() + " commented on your post";
+
+            case "FOLLOW" ->
+                    n.getSender().getUsername() + " started following you";
+
+            case "CONNECTION_REQUEST" ->
+                    n.getSender().getUsername() + " sent you a connection request";
+
+            case "CONNECTION_ACCEPTED" ->
+                    n.getSender().getUsername() + " accepted your connection request";
+
+            default ->
+                    "New notification";
         };
     }
 }
