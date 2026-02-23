@@ -27,6 +27,8 @@
             text-decoration: none;
             margin-right: 10px;
             display: inline-block;
+            border: none;
+            cursor: pointer;
         }
 
         .btn-primary {
@@ -58,7 +60,8 @@
 
     <div class="counts">
         Followers: <span th:text="${profile.followerCount}"></span> |
-        Following: <span th:text="${profile.followingCount}"></span>
+        Following: <span th:text="${profile.followingCount}"></span> |
+        Connections: <span th:text="${connectionCount}"></span>
     </div>
 
     <!-- Show Edit Button only if own profile -->
@@ -66,22 +69,44 @@
         <a th:href="@{/profile/edit}" class="btn btn-secondary">Edit Profile</a>
     </div>
 
-    <!-- Show Follow / Unfollow only if NOT own profile -->
+    <!-- Show Follow / Unfollow + Connection only if NOT own profile -->
     <div th:if="${!profile.isOwnProfile}">
 
-        <!-- If NOT following -->
+        <!-- Follow Section (UNCHANGED) -->
         <form th:if="${!profile.isFollowing}"
               th:action="@{/follow/{username}(username=${profile.username})}"
               method="post">
             <button type="submit" class="btn btn-primary">Follow</button>
         </form>
 
-        <!-- If already following -->
         <form th:if="${profile.isFollowing}"
               th:action="@{/follow/unfollow/{username}(username=${profile.username})}"
               method="post">
             <button type="submit" class="btn btn-danger">Unfollow</button>
         </form>
+
+        <!-- ================= CONNECTION SECTION ================= -->
+
+        <!-- Not Connected -->
+        <form th:if="${connectionStatus == 'NONE'}"
+              th:action="@{/connection/send/{username}(username=${profile.username})}"
+              method="post">
+            <button type="submit" class="btn btn-primary">Connect</button>
+        </form>
+
+        <!-- Pending -->
+        <button th:if="${connectionStatus == 'PENDING'}"
+                class="btn btn-secondary"
+                disabled>
+            Pending
+        </button>
+
+        <!-- Connected -->
+        <button th:if="${connectionStatus == 'ACCEPTED'}"
+                class="btn btn-secondary"
+                disabled>
+            Connected
+        </button>
 
     </div>
 
