@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.ProfileResponse;
 import com.example.demo.dto.UpdateProfileRequest;
+import com.example.demo.service.ConnectionService;
 import com.example.demo.service.ProfileService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -13,22 +14,31 @@ import org.springframework.web.bind.annotation.*;
 public class ProfileController {
 
     private final ProfileService profileService;
+    private final ConnectionService connectionService; // ✅ NEW
 
-    public ProfileController(ProfileService profileService) {
+    public ProfileController(ProfileService profileService,
+                             ConnectionService connectionService) { // ✅ UPDATED
         this.profileService = profileService;
+        this.connectionService = connectionService;
     }
 
     // ================= VIEW MY PROFILE =================
     @GetMapping
     public String getMyProfile(Authentication authentication, Model model) {
 
+        String currentUsername = authentication.getName();
+
         ProfileResponse profile =
                 profileService.getProfileWithFollowInfo(
-                        authentication.getName(),
-                        authentication.getName()
+                        currentUsername,
+                        currentUsername
                 );
 
         model.addAttribute("profile", profile);
+
+        // ✅ Add connection count
+        model.addAttribute("connectionCount",
+                connectionService.getConnectionCount(currentUsername));
 
         return "profile";
     }
@@ -39,13 +49,26 @@ public class ProfileController {
                               Authentication authentication,
                               Model model) {
 
+        String currentUsername = authentication.getName();
+
         ProfileResponse profile =
                 profileService.getProfileWithFollowInfo(
-                        authentication.getName(),
+                        currentUsername,
                         username
                 );
 
         model.addAttribute("profile", profile);
+
+        // ✅ Add connection status
+        model.addAttribute("connectionStatus",
+                connectionService.getConnectionStatus(
+                        currentUsername,
+                        username
+                ));
+
+        // ✅ Add connection count
+        model.addAttribute("connectionCount",
+                connectionService.getConnectionCount(username));
 
         return "profile";
     }
