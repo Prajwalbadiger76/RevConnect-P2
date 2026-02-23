@@ -40,7 +40,36 @@ public class ConnectionServiceImpl implements ConnectionService {
         Optional<Connection> existing =
                 connectionRepository.findByRequesterAndReceiver(requester, receiver);
 
-        if (existing.isPresent()) return;
+        Optional<Connection> existing =
+                connectionRepository.findByRequesterAndReceiver(requester, receiver);
+
+        if (existing.isPresent()) {
+
+            Connection connection = existing.get();
+
+            if (connection.getStatus() == ConnectionStatus.PENDING) {
+                return; // already pending
+            }
+
+            if (connection.getStatus() == ConnectionStatus.ACCEPTED) {
+                return; // already connected
+            }
+
+            if (connection.getStatus() == ConnectionStatus.REJECTED) {
+                connection.setStatus(ConnectionStatus.PENDING);
+                connection.setCreatedAt(LocalDateTime.now());
+                connectionRepository.save(connection);
+
+                notificationService.createNotification(
+                        receiver.getUsername(),
+                        requester.getUsername(),
+                        "CONNECTION_REQUEST",
+                        null
+                );
+            }
+
+            return;
+        }
 
         Connection connection = new Connection();
         connection.setRequester(requester);
