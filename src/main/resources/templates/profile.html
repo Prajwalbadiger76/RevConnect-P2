@@ -85,28 +85,41 @@
             <button type="submit" class="btn btn-danger">Unfollow</button>
         </form>
 
-        <!-- ================= CONNECTION SECTION ================= -->
+		<!-- ================= CONNECTION SECTION ================= -->
 
-        <!-- Not Connected -->
-        <form th:if="${connectionStatus == 'NONE'}"
-              th:action="@{/connection/send/{username}(username=${profile.username})}"
-              method="post">
-            <button type="submit" class="btn btn-primary">Connect</button>
-        </form>
+		<!-- Not Connected -->
+		<form th:if="${connectionStatus == 'NONE'}"
+		      th:action="@{/connection/send/{username}(username=${profile.username})}"
+		      method="post">
+		    <button type="submit" class="btn btn-primary">Connect</button>
+		</form>
 
-        <!-- Pending -->
-        <button th:if="${connectionStatus == 'PENDING'}"
-                class="btn btn-secondary"
-                disabled>
-            Pending
-        </button>
+		<!-- Request Sent -->
+		<button th:if="${connectionStatus == 'PENDING' and pendingRequestId == null}"
+		        class="btn btn-secondary"
+		        disabled>
+		    Pending
+		</button>
 
-        <!-- Connected -->
-        <button th:if="${connectionStatus == 'ACCEPTED'}"
-                class="btn btn-secondary"
-                disabled>
-            Connected
-        </button>
+		<!-- Request Received -->
+		<div th:if="${connectionStatus == 'PENDING' and pendingRequestId != null}">
+		    <form th:action="@{/connection/accept/{id}(id=${pendingRequestId})}"
+		          method="post" style="display:inline;">
+		        <button type="submit" class="btn btn-primary">Accept</button>
+		    </form>
+
+		    <form th:action="@{/connection/reject/{id}(id=${pendingRequestId})}"
+		          method="post" style="display:inline;">
+		        <button type="submit" class="btn btn-danger">Reject</button>
+		    </form>
+		</div>
+
+		<!-- Connected -->
+		<button th:if="${connectionStatus == 'ACCEPTED'}"
+		        class="btn btn-secondary"
+		        disabled>
+		    Connected
+		</button>
 
     </div>
 

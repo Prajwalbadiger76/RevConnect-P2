@@ -138,4 +138,27 @@ public class ConnectionServiceImpl implements ConnectionService {
         return connectionRepository
                 .findByReceiverAndStatus(user, ConnectionStatus.PENDING);
     }
+    @Override
+    public Long getPendingRequestId(String currentUsername, String targetUsername) {
+
+        User currentUser = userRepository.findByUsername(currentUsername)
+                .orElseThrow();
+
+        User targetUser = userRepository.findByUsername(targetUsername)
+                .orElseThrow();
+
+        Optional<Connection> received =
+                connectionRepository.findByRequesterAndReceiver(
+                        targetUser,
+                        currentUser
+                );
+
+        if (received.isPresent()
+                && received.get().getStatus() == ConnectionStatus.PENDING) {
+
+            return received.get().getId();
+        }
+
+        return null;
+    }
 }

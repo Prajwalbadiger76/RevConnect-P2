@@ -69,6 +69,14 @@ public class ProfileController {
         // ✅ Add connection count
         model.addAttribute("connectionCount",
                 connectionService.getConnectionCount(username));
+        
+        Long pendingRequestId =
+                connectionService.getPendingRequestId(
+                        currentUsername,
+                        username
+                );
+
+        model.addAttribute("pendingRequestId", pendingRequestId);
 
         return "profile";
     }

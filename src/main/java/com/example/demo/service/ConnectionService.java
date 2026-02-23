@@ -17,4 +17,6 @@ public interface ConnectionService {
     long getConnectionCount(String username);
 
     List<Connection> getPendingRequests(String username);
+    
+    Long getPendingRequestId(String currentUsername, String targetUsername);
 }
