@@ -1,25 +1,114 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Edit Post</title>
+    <title>Edit Post - RevConnect</title>
+    <meta charset="UTF-8">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background-color: #111827;
+            color: white;
+            padding: 15px 30px;
+        }
+
+        .navbar h2 {
+            margin: 0;
+        }
+
+        .container {
+            width: 40%;
+            margin: 60px auto;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            resize: vertical;
+            font-size: 14px;
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+    </style>
 </head>
 <body>
 
-<h2>Edit Post</h2>
+<div class="navbar">
+    <h2>RevConnect</h2>
+</div>
 
-<form th:action="@{/post/update/{id}(id=${post.id})}" method="post">
-    <textarea name="content"
-              rows="5"
-              style="width:400px;"
-              th:text="${post.content}"
-              required></textarea>
+<div class="container">
+    <div class="card">
 
-    <br><br>
-    <button type="submit">Update Post</button>
-</form>
+        <h2>Edit Post</h2>
 
-<br>
-<a th:href="@{/feed}">Cancel</a>
+        <form th:action="@{/post/update/{id}(id=${post.id})}" method="post">
+            <textarea name="content"
+                      rows="5"
+                      th:text="${post.content}"
+                      required></textarea>
+
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary">
+                    Update Post
+                </button>
+
+                <a th:href="@{/feed}" class="btn btn-secondary">
+                    Cancel
+                </a>
+            </div>
+        </form>
+
+    </div>
+</div>
 
 </body>
 </html>
