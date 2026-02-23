@@ -41,22 +41,23 @@ public class ProfileServiceImpl implements ProfileService {
     public ProfileResponse getProfileWithFollowInfo(String currentUsername,
                                                     String targetUsername) {
 
-        User targetUser = findUser(targetUsername);
+        User currentUser = userRepository.findByUsername(currentUsername).orElseThrow();
+        User targetUser = userRepository.findByUsername(targetUsername).orElseThrow();
 
-        boolean isOwnProfile = currentUsername.equals(targetUsername);
+        boolean isOwn = currentUsername.equals(targetUsername);
 
         boolean isFollowing = false;
-
-        if (!isOwnProfile) {
-            User currentUser = findUser(currentUsername);
-
+        if (!isOwn) {
             isFollowing = followRepository
                     .findByFollowerAndFollowing(currentUser, targetUser)
                     .isPresent();
         }
 
-        long followers = followRepository.countByFollowing(targetUser);
-        long following = followRepository.countByFollower(targetUser);
+        long followerCount =
+                followRepository.countByFollowing(targetUser);
+
+        long followingCount =
+                followRepository.countByFollower(targetUser);
 
         return new ProfileResponse(
                 targetUser.getUsername(),
@@ -69,9 +70,9 @@ public class ProfileServiceImpl implements ProfileService {
                 targetUser.getWebsite(),
                 targetUser.isPrivate(),
                 isFollowing,
-                followers,
-                following,
-                isOwnProfile
+                followerCount,
+                followingCount,
+                isOwn
         );
     }
 

@@ -71,7 +71,6 @@ public class PostDto {
         this.likedByCurrentUser = likedByCurrentUser;
     }
     
-    
 
     public List<CommentDto> getComments() {
         return comments;

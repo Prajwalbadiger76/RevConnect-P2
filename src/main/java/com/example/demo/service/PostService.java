@@ -8,8 +8,16 @@ public interface PostService {
     void createPost(String username, String content);
 
     List<PostDto> getUserPosts(String username);
+    
+    void toggleLike(Long postId, String username);
 
     List<PostDto> getAllPosts();
 
     List<PostDto> getFeedPosts(String username);
+    
+    void updatePost(Long postId, String username, String content);
+
+    void deletePost(Long postId, String username);
+    
+    void sharePost(Long id, String username);
 }

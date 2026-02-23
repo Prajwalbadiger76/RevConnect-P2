@@ -19,7 +19,7 @@ public class ProfileController {
     }
 
     // ================= VIEW MY PROFILE =================
-    @GetMapping("/me")
+    @GetMapping
     public String getMyProfile(Authentication authentication, Model model) {
 
         ProfileResponse profile =
@@ -69,6 +69,21 @@ public class ProfileController {
 
         profileService.updateProfile(authentication.getName(), request);
 
-        return "redirect:/profile/me";
+        return "redirect:/profile";
+    }
+
+    // ================= SEARCH USERS =================
+    @GetMapping("/search")
+    public String searchUsers(@RequestParam String keyword,
+                              Authentication authentication,
+                              Model model) {
+
+        model.addAttribute("results",
+                profileService.searchUsers(keyword));
+
+        model.addAttribute("currentUsername",
+                authentication.getName());
+
+        return "search-results";
     }
 }

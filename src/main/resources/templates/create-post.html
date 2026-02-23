@@ -2,22 +2,44 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Create Post</title>
+    <style>
+        body {
+            font-family: Arial;
+            max-width: 600px;
+            margin: auto;
+            padding: 40px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            resize: none;
+        }
+
+        button {
+            padding: 8px 15px;
+            margin-top: 10px;
+        }
+
+        .btn-back {
+            text-decoration: none;
+            margin-left: 10px;
+        }
+    </style>
 </head>
 <body>
 
-<h2>Create Post</h2>
+<h2>Create New Post</h2>
 
-<form th:action="@{/posts/create}" method="post">
-
+<form th:action="@{/post/create}" method="post">
     <textarea name="content"
+              rows="5"
               placeholder="What's on your mind?"
-              rows="5" cols="50"></textarea>
-
-    <br/><br/>
+              required></textarea>
+    <br>
     <button type="submit">Post</button>
+    <a th:href="@{/feed}" class="btn-back">Cancel</a>
 </form>
-
-<a th:href="@{/feed}">Go to Feed</a>
 
 </body>
 </html>

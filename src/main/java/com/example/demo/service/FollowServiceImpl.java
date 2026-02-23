@@ -11,11 +11,14 @@ public class FollowServiceImpl implements FollowService {
 
     private final FollowRepository followRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public FollowServiceImpl(FollowRepository followRepository,
-                             UserRepository userRepository) {
+                             UserRepository userRepository,
+                             NotificationService notificationService) {
         this.followRepository = followRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -35,6 +38,14 @@ public class FollowServiceImpl implements FollowService {
         follow.setFollowing(following);
 
         followRepository.save(follow);
+
+        // 🔔 FOLLOW NOTIFICATION
+        notificationService.createNotification(
+                targetUsername,
+                currentUsername,
+                "FOLLOW",
+                null
+        );
     }
 
     @Override

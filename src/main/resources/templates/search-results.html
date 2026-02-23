@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Search Results</title>
+    <style>
+        body {
+            font-family: Arial;
+            max-width: 700px;
+            margin: auto;
+            padding: 30px;
+        }
+
+        .user-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .username {
+            font-weight: bold;
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .username:hover {
+            text-decoration: underline;
+        }
+
+        .btn {
+            padding: 5px 10px;
+            margin-top: 5px;
+        }
+
+        .nav {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="nav">
+    <a th:href="@{/feed}">Back to Feed</a>
+</div>
+
+<h2>Search Results</h2>
+
+<div th:if="${results.isEmpty()}">
+    <p>No users found.</p>
+</div>
+
+<div th:each="user : ${results}" class="user-card">
+
+    <a th:href="@{/profile/{username}(username=${user.username})}"
+       class="username"
+       th:text="${user.username}">
+    </a>
+
+    <div>
+        <span th:text="${user.fullName}"></span>
+    </div>
+
+    <div>
+        Followers:
+        <span th:text="${user.followerCount}"></span>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -16,13 +16,17 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final NotificationService notificationService;
 
     public CommentServiceImpl(CommentRepository commentRepository,
                               UserRepository userRepository,
-                              PostRepository postRepository) {
+                              PostRepository postRepository,
+                              NotificationService notificationService) {
+
         this.commentRepository = commentRepository;
         this.userRepository = userRepository;
         this.postRepository = postRepository;
+        this.notificationService = notificationService;
     }
 
     // ================= ADD COMMENT =================
@@ -43,6 +47,14 @@ public class CommentServiceImpl implements CommentService {
         comment.setPost(post);
 
         commentRepository.save(comment);
+
+        // 🔔 CREATE COMMENT NOTIFICATION
+        notificationService.createNotification(
+                post.getUser().getUsername(),  // recipient (post owner)
+                username,                      // sender
+                "COMMENT",
+                post.getId()
+        );
     }
 
     // ================= DELETE COMMENT =================

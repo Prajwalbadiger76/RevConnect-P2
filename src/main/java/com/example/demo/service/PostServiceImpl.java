@@ -21,6 +21,7 @@ public class PostServiceImpl implements PostService {
     private final FollowRepository followRepository;
     private final LikeRepository likeRepository;
     private final CommentRepository commentRepository;
+    private final NotificationService notificationService;
 
     public PostServiceImpl(PostRepository postRepository,
                            HashtagRepository hashtagRepository,
@@ -28,7 +29,8 @@ public class PostServiceImpl implements PostService {
                            UserRepository userRepository,
                            FollowRepository followRepository,
                            LikeRepository likeRepository,
-                           CommentRepository commentRepository) {
+                           CommentRepository commentRepository,
+                           NotificationService notificationService) {
 
         this.postRepository = postRepository;
         this.hashtagRepository = hashtagRepository;
@@ -37,6 +39,7 @@ public class PostServiceImpl implements PostService {
         this.followRepository = followRepository;
         this.likeRepository = likeRepository;
         this.commentRepository = commentRepository;
+        this.notificationService = notificationService;
     }
 
     // ================= CREATE POST =================
@@ -54,27 +57,102 @@ public class PostServiceImpl implements PostService {
 
         postRepository.save(post);
 
-        // Hashtag Parsing
-        Pattern pattern = Pattern.compile("#(\\w+)");
-        Matcher matcher = pattern.matcher(content);
+        parseHashtags(post, content);
+    }
 
-        while (matcher.find()) {
+    // ================= UPDATE POST =================
 
-            String tag = matcher.group(1).toLowerCase();
+    @Override
+    public void updatePost(Long postId, String content, String username) {
 
-            Hashtag hashtag = hashtagRepository
-                    .findByName(tag)
-                    .orElseGet(() -> {
-                        Hashtag newTag = new Hashtag();
-                        newTag.setName(tag);
-                        return hashtagRepository.save(newTag);
-                    });
+        Post post = postRepository.findById(postId)
+                .orElseThrow();
 
-            PostHashtag ph = new PostHashtag();
-            ph.setPost(post);
-            ph.setHashtag(hashtag);
+        if (!post.getUser().getUsername().equals(username)) {
+            throw new RuntimeException("You cannot edit this post");
+        }
 
-            postHashtagRepository.save(ph);
+        post.setContent(content);
+        postRepository.save(post);
+    }
+
+    // ================= DELETE POST =================
+
+    @Override
+    public void deletePost(Long postId, String username) {
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow();
+
+        if (!post.getUser().getUsername().equals(username)) {
+            throw new RuntimeException("You cannot delete this post");
+        }
+
+        postRepository.delete(post);
+    }
+
+    // ================= SHARE POST =================
+
+    @Override
+    public void sharePost(Long postId, String username) {
+
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow();
+
+        Post originalPost = postRepository.findById(postId)
+                .orElseThrow();
+
+        Post sharedPost = new Post();
+        sharedPost.setContent("🔁 Shared from @" 
+                + originalPost.getUser().getUsername()
+                + "\n\n" + originalPost.getContent());
+        sharedPost.setCreatedAt(LocalDateTime.now());
+        sharedPost.setUser(currentUser);
+
+        postRepository.save(sharedPost);
+
+        // 🔔 Notify original author (if not self)
+        if (!originalPost.getUser().getUsername().equals(username)) {
+            notificationService.createNotification(
+                    originalPost.getUser().getUsername(),
+                    username,
+                    "SHARE",
+                    originalPost.getId()
+            );
+        }
+    }
+
+    // ================= TOGGLE LIKE =================
+
+    @Override
+    public void toggleLike(Long postId, String username) {
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow();
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow();
+
+        Optional<Like> existingLike =
+                likeRepository.findByUserAndPost(user, post);
+
+        if (existingLike.isPresent()) {
+            likeRepository.delete(existingLike.get());
+        } else {
+
+            Like like = new Like();
+            like.setUser(user);
+            like.setPost(post);
+            likeRepository.save(like);
+
+            if (!post.getUser().getUsername().equals(username)) {
+                notificationService.createNotification(
+                        post.getUser().getUsername(),
+                        username,
+                        "LIKE",
+                        post.getId()
+                );
+            }
         }
     }
 
@@ -92,7 +170,7 @@ public class PostServiceImpl implements PostService {
                 .collect(Collectors.toList());
     }
 
-    // ================= GLOBAL POSTS =================
+    // ================= ALL POSTS =================
 
     @Override
     public List<PostDto> getAllPosts() {
@@ -147,13 +225,11 @@ public class PostServiceImpl implements PostService {
         dto.setCreatedAt(post.getCreatedAt());
         dto.setUsername(post.getUser().getUsername());
 
-        // Likes
         dto.setLikeCount(likeRepository.countByPost(post));
         dto.setLikedByCurrentUser(
                 likeRepository.findByUserAndPost(currentUser, post).isPresent()
         );
 
-        // Comments
         List<CommentDto> commentDtos = commentRepository
                 .findByPostOrderByCreatedAtAsc(post)
                 .stream()
@@ -174,5 +250,32 @@ public class PostServiceImpl implements PostService {
         dto.setComments(commentDtos);
 
         return dto;
+    }
+
+    // ================= HASHTAG PARSER =================
+
+    private void parseHashtags(Post post, String content) {
+
+        Pattern pattern = Pattern.compile("#(\\w+)");
+        Matcher matcher = pattern.matcher(content);
+
+        while (matcher.find()) {
+
+            String tag = matcher.group(1).toLowerCase();
+
+            Hashtag hashtag = hashtagRepository
+                    .findByName(tag)
+                    .orElseGet(() -> {
+                        Hashtag newTag = new Hashtag();
+                        newTag.setName(tag);
+                        return hashtagRepository.save(newTag);
+                    });
+
+            PostHashtag ph = new PostHashtag();
+            ph.setPost(post);
+            ph.setHashtag(hashtag);
+
+            postHashtagRepository.save(ph);
+        }
     }
 }

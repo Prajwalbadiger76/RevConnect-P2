@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Post</title>
+</head>
+<body>
+
+<h2>Edit Post</h2>
+
+<form th:action="@{/post/update/{id}(id=${post.id})}" method="post">
+    <textarea name="content"
+              rows="5"
+              style="width:400px;"
+              th:text="${post.content}"
+              required></textarea>
+
+    <br><br>
+    <button type="submit">Update Post</button>
+</form>
+
+<br>
+<a th:href="@{/feed}">Cancel</a>
+
+</body>
+</html>

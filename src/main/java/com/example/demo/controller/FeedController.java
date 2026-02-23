@@ -24,6 +24,8 @@ public class FeedController {
         model.addAttribute("posts",
                 postService.getFeedPosts(username));
 
+        model.addAttribute("currentUsername", username); // 🔥 IMPORTANT
+
         return "feed";
     }
 }
