@@ -40,9 +40,6 @@ public class ConnectionServiceImpl implements ConnectionService {
         Optional<Connection> existing =
                 connectionRepository.findByRequesterAndReceiver(requester, receiver);
 
-        Optional<Connection> existing =
-                connectionRepository.findByRequesterAndReceiver(requester, receiver);
-
         if (existing.isPresent()) {
 
             Connection connection = existing.get();
