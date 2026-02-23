@@ -89,7 +89,7 @@
 
 		<!-- Not Connected -->
 		<form th:if="${connectionStatus == 'NONE'}"
-		      th:action="@{/connection/send/{username}(username=${profile.username})}"
+		      th:action="@{/connections/send/{username}(username=${profile.username})}"
 		      method="post">
 		    <button type="submit" class="btn btn-primary">Connect</button>
 		</form>
@@ -99,16 +99,16 @@
 		        class="btn btn-secondary"
 		        disabled>
 		    Pending
-		</button>
+		</button> 	
 
 		<!-- Request Received -->
 		<div th:if="${connectionStatus == 'PENDING' and pendingRequestId != null}">
-		    <form th:action="@{/connection/accept/{id}(id=${pendingRequestId})}"
+		    <form th:action="@{/connections/accept/{id}(id=${pendingRequestId})}"
 		          method="post" style="display:inline;">
 		        <button type="submit" class="btn btn-primary">Accept</button>
 		    </form>
 
-		    <form th:action="@{/connection/reject/{id}(id=${pendingRequestId})}"
+		    <form th:action="@{/connections/reject/{id}(id=${pendingRequestId})}"
 		          method="post" style="display:inline;">
 		        <button type="submit" class="btn btn-danger">Reject</button>
 		    </form>

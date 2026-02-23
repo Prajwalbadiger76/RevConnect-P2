@@ -205,12 +205,13 @@
     <div style="display:flex; align-items:center;">
 
         <!-- 🔔 Notification Bell (ONLY addition) -->
+		
         <div class="notif-container" onclick="toggleNotifications()">
             🔔
             <span id="notifCount" class="notif-count"></span>
             <div id="notifDropdown" class="notif-dropdown"></div>
         </div>
-
+		<a th:href="@{/connections/accepted}">My Connections</a>
         <a th:href="@{/profile}">Profile</a>
         <a th:href="@{/logout}">Logout</a>
     </div>

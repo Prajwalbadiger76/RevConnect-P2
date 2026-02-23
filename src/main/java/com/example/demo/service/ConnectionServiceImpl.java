@@ -6,6 +6,7 @@ import com.example.demo.repo.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -160,5 +161,38 @@ public class ConnectionServiceImpl implements ConnectionService {
         }
 
         return null;
+    }
+    
+    @Override
+    public List<User> getAcceptedConnections(String username) {
+
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow();
+
+        List<Connection> sentAccepted =
+                connectionRepository.findByRequesterAndStatus(
+                        currentUser,
+                        ConnectionStatus.ACCEPTED
+                );
+
+        List<Connection> receivedAccepted =
+                connectionRepository.findByReceiverAndStatus(
+                        currentUser,
+                        ConnectionStatus.ACCEPTED
+                );
+
+        List<User> connectedUsers = new ArrayList<>();
+
+        // If current user sent request
+        for (Connection c : sentAccepted) {
+            connectedUsers.add(c.getReceiver());
+        }
+
+        // If current user received request
+        for (Connection c : receivedAccepted) {
+            connectedUsers.add(c.getRequester());
+        }
+
+        return connectedUsers;
     }
 }

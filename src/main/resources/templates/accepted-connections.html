@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>My Connections</title>
+</head>
+<body>
+
+<h2>My Connections</h2>
+
+<div th:if="${#lists.isEmpty(connections)}">
+    <p>No connections yet.</p>
+</div>
+
+<div th:each="user : ${connections}">
+    <p>
+        <a th:href="@{/profile/{username}(username=${user.username})}"
+           th:text="${user.username}">
+        </a>
+    </p>
+</div>
+
+<br>
+<a th:href="@{/feed}">Back to Feed</a>
+
+</body>
+</html>

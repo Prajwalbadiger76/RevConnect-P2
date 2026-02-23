@@ -7,7 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/connection")
+@RequestMapping("/connections")
 public class ConnectionController {
 
     private final ConnectionService connectionService;
@@ -16,8 +16,7 @@ public class ConnectionController {
         this.connectionService = connectionService;
     }
 
-    // ================= SEND REQUEST =================
-
+    // SEND REQUEST
     @PostMapping("/send/{username}")
     public String sendRequest(@PathVariable String username,
                               Authentication authentication) {
@@ -30,8 +29,7 @@ public class ConnectionController {
         return "redirect:/profile/" + username;
     }
 
-    // ================= ACCEPT =================
-
+    // ACCEPT
     @PostMapping("/accept/{id}")
     public String acceptRequest(@PathVariable Long id,
                                 Authentication authentication) {
@@ -44,8 +42,7 @@ public class ConnectionController {
         return "redirect:/connections";
     }
 
-    // ================= REJECT =================
-
+    // REJECT
     @PostMapping("/reject/{id}")
     public String rejectRequest(@PathVariable Long id,
                                 Authentication authentication) {
@@ -58,8 +55,7 @@ public class ConnectionController {
         return "redirect:/connections";
     }
 
-    // ================= VIEW PENDING =================
-
+    // VIEW PENDING REQUESTS
     @GetMapping
     public String viewPendingRequests(Authentication authentication,
                                       Model model) {
@@ -70,5 +66,17 @@ public class ConnectionController {
                 ));
 
         return "connections";
+    }
+    
+    @GetMapping("/accepted")
+    public String viewAcceptedConnections(Authentication authentication,
+                                          Model model) {
+
+        model.addAttribute("connections",
+                connectionService.getAcceptedConnections(
+                        authentication.getName()
+                ));
+
+        return "accepted-connections";
     }
 }
