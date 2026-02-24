@@ -41,19 +41,26 @@ public class AuthController {
     
     @PostMapping("/login")
     public String login(@Valid @ModelAttribute LoginRequest request,
-                        HttpServletResponse response) {
+                        HttpServletResponse response,
+                        org.springframework.ui.Model model) {
 
-        String token = userService.login(request);
+        try {
+            String token = userService.login(request);
 
-        Cookie jwtCookie = new Cookie("JWT", token);
-        jwtCookie.setHttpOnly(true);
-        jwtCookie.setPath("/");
-        jwtCookie.setMaxAge(60 * 60);
+            Cookie jwtCookie = new Cookie("JWT", token);
+            jwtCookie.setHttpOnly(true);
+            jwtCookie.setPath("/");
+            jwtCookie.setMaxAge(60 * 60);
 
-        response.addCookie(jwtCookie);
+            response.addCookie(jwtCookie);
 
-        return "redirect:/feed";
+            return "redirect:/feed";
+
+        } catch (com.example.demo.exception.CustomException ex) {
+
+            model.addAttribute("error", "Invalid username or password");
+            return "login";   // stay on login page
+        }
     }
-    
 
 }
